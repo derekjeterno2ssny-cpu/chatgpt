@@ -35,8 +35,7 @@
           if (error.name !== 'SecurityError') throw error;
         }
         if (ready) {
-          await runExport(target);
-          return;
+          return await runExport(target);
         }
         await delay(250);
       }
@@ -176,7 +175,7 @@
         }
         window.sessionStorage.removeItem(key);
         excel.click();
-        return; // クリックの成功は、ダウンロード完了の保証ではない。
+        return pending; // クリックの成功は、ダウンロード完了の保証ではない。
       }
       await delay(250);
     }
