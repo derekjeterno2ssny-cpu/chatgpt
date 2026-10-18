@@ -1,23 +1,51 @@
 /* B10地区別売上: 公開DOMの操作だけを行うブックマークレット。 */
-(async () => {
+(async function runExport(window) {
   'use strict';
+  const {document, location} = window;
+  const prompt = (...args) => window.prompt(...args);
+  const alert = message => window.alert(message);
   const normalize = s => String(s || '').replace(/\s/g, '');
   const visible = el => el && el.getClientRects().length > 0;
   const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
   const key = 'fsbi-b10-export-v1';
   let originalOpen;
   let wrappedOpen;
+  let acquired = false;
   const popups = [];
   try {
     if (location.hostname !== 'in-bi.four-seeds.jp' || !location.pathname.startsWith('/fsbi/')) {
-      throw new Error('会社の分析帳票サイトで、B10「地区別売上」を開いてから実行してください。');
+      throw new Error('会社の分析帳票サイトのメインメニュー、またはB10「地区別売上」で実行してください。');
     }
     if (window.__b10ExportRunning) throw new Error('すでに処理中です。しばらくお待ちください。');
     window.__b10ExportRunning = true;
+    acquired = true;
+    if (/^\/fsbi\/MenuPage\/MenuPage\/?$/.test(location.pathname)) {
+      // メインメニューを残して同一サイトのB10を開く。親画面から処理を続ける。
+      const target = window.open('/fsbi/RPTS00/recover?linkRpt=B10R01', '_blank');
+      if (!target) throw new Error('地区別売上の画面を開けませんでした。ブラウザーにポップアップがブロックされた表示がないか確認してください。');
+      for (let i = 0; i < 180; i++) {
+        if (target.closed) throw new Error('地区別売上の画面が閉じられました。');
+        let ready = false;
+        try {
+          const doc = target.document;
+          ready = normalize(doc.body?.innerText).includes('B10：地区別売上') &&
+            doc.querySelectorAll('main .ant-select [role="combobox"]').length === 2 &&
+            doc.querySelector('.vxe-table tr[rowid]');
+        } catch (error) {
+          if (error.name !== 'SecurityError') throw error;
+        }
+        if (ready) {
+          await runExport(target);
+          return;
+        }
+        await delay(250);
+      }
+      throw new Error('地区別売上の選択画面を開けませんでした。開いたタブにログイン画面やエラーがないか確認してください。');
+    }
     const button = (doc, text) => [...doc.querySelectorAll('button')]
       .find(el => visible(el) && normalize(el.textContent) === normalize(text));
     let pending;
-    try { pending = JSON.parse(sessionStorage.getItem(key)); } catch (_) {}
+    try { pending = JSON.parse(window.sessionStorage.getItem(key)); } catch (_) {}
     if (!pending || Date.now() - pending.started > 180000) pending = null;
     const onReport = !!button(document, 'Excel出力');
     if (onReport && !pending) throw new Error('まず店舗・月を選ぶB10の検索画面で、このお気に入りを押してください。');
@@ -84,7 +112,7 @@
           for (const wrapper of wrappers) {
             const originalTop = wrapper.scrollTop;
             wrapper.scrollTop = 0;
-            wrapper.dispatchEvent(new Event('scroll'));
+            wrapper.dispatchEvent(new window.Event('scroll'));
             await delay(200);
             for (let step = 0; step < 600 && Date.now() < deadline; step++) {
               row = findRow();
@@ -99,12 +127,12 @@
               const before = wrapper.scrollTop;
               wrapper.scrollTop = Math.min(wrapper.scrollHeight - wrapper.clientHeight,
                 before + Math.max(32, Math.floor(wrapper.clientHeight * 0.8)));
-              wrapper.dispatchEvent(new Event('scroll'));
+              wrapper.dispatchEvent(new window.Event('scroll'));
               await delay(160);
               if (wrapper.scrollTop === before) break;
             }
             wrapper.scrollTop = originalTop;
-            wrapper.dispatchEvent(new Event('scroll'));
+            wrapper.dispatchEvent(new window.Event('scroll'));
             await delay(160);
           }
           return findRow();
@@ -122,7 +150,7 @@
       const run = button(document, '実行');
       if (!run || run.disabled) throw new Error('実行ボタンを操作できません。');
       pending = {year, month, store, started: Date.now()};
-      sessionStorage.setItem(key, JSON.stringify(pending));
+      window.sessionStorage.setItem(key, JSON.stringify(pending));
       originalOpen = window.open;
       wrappedOpen = function (...args) {
         const child = originalOpen.apply(window, args);
@@ -146,7 +174,7 @@
         if (storeMatch[1] !== pending.store || Number(periodMatch[1]) !== pending.year || Number(periodMatch[2]) !== pending.month || Number(periodMatch[4]) !== pending.year || Number(periodMatch[5]) !== pending.month) {
           throw new Error('結果画面の店舗または対象月が指定と違います。Excel出力を停止しました。');
         }
-        sessionStorage.removeItem(key);
+        window.sessionStorage.removeItem(key);
         excel.click();
         return; // クリックの成功は、ダウンロード完了の保証ではない。
       }
@@ -154,10 +182,10 @@
     }
     throw new Error('結果画面を自動で取得できませんでした。結果画面で同じお気に入りをもう一度押してください。');
   } catch (error) {
-    sessionStorage.removeItem(key);
+    if (acquired) window.sessionStorage.removeItem(key);
     alert('地区別売上：' + error.message);
   } finally {
     if (wrappedOpen && window.open === wrappedOpen) window.open = originalOpen;
-    window.__b10ExportRunning = false;
+    if (acquired) window.__b10ExportRunning = false;
   }
-})();
+})(window);
