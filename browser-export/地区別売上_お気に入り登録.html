@@ -1,0 +1,127 @@
+<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>地区別売上・お気に入り登録</title>
+<style>body{font-family:system-ui,sans-serif;max-width:800px;margin:48px auto;padding:0 24px;color:#183047;line-height:1.9}h1{font-size:26px}a.bookmark{display:inline-block;background:#086bd8;color:white;padding:14px 24px;border-radius:8px;text-decoration:none;font-weight:bold}li{margin:12px 0}.note{background:#f0f5fa;padding:16px;border-radius:8px}pre{white-space:pre-wrap;font-size:12px}summary{cursor:pointer}</style>
+<h1>地区別売上をExcel出力する試作版</h1>
+<p>インストールは不要です。ログイン済みの会社サイト上で、年月・店舗の指定と出力ボタンの操作を補助します。</p>
+<h2>最初に1回だけ</h2><ol><li>このファイルを保存して、会社のPCのEdgeまたはChromeで開きます。</li><li><strong>Ctrl＋Shift＋B</strong>でお気に入りバーを表示します。</li><li>下の青いボタンを、お気に入りバーへ<strong>ドラッグ</strong>します。ここでクリックしても会社サイトは操作できません。</li></ol>
+<p><a class="bookmark" href="javascript:void %2F*%20B10%E5%9C%B0%E5%8C%BA%E5%88%A5%E5%A3%B2%E4%B8%8A%3A%20%E5%85%AC%E9%96%8BDOM%E3%81%AE%E6%93%8D%E4%BD%9C%E3%81%A0%E3%81%91%E3%82%92%E8%A1%8C%E3%81%86%E3%83%96%E3%83%83%E3%82%AF%E3%83%9E%E3%83%BC%E3%82%AF%E3%83%AC%E3%83%83%E3%83%88%E3%80%82%20*%2F%0A(async%20()%20%3D%3E%20%7B%0A%20%20&#x27;use%20strict&#x27;%3B%0A%20%20const%20normalize%20%3D%20s%20%3D%3E%20String(s%20%7C%7C%20&#x27;&#x27;).replace(%2F%5Cs%2Fg%2C%20&#x27;&#x27;)%3B%0A%20%20const%20visible%20%3D%20el%20%3D%3E%20el%20%26%26%20el.getClientRects().length%20%3E%200%3B%0A%20%20const%20delay%20%3D%20ms%20%3D%3E%20new%20Promise(resolve%20%3D%3E%20setTimeout(resolve%2C%20ms))%3B%0A%20%20const%20key%20%3D%20&#x27;fsbi-b10-export-v1&#x27;%3B%0A%20%20let%20originalOpen%3B%0A%20%20let%20wrappedOpen%3B%0A%20%20const%20popups%20%3D%20%5B%5D%3B%0A%20%20try%20%7B%0A%20%20%20%20if%20(location.hostname%20!%3D%3D%20&#x27;in-bi.four-seeds.jp&#x27;%20%7C%7C%20!location.pathname.startsWith(&#x27;%2Ffsbi%2F&#x27;))%20%7B%0A%20%20%20%20%20%20throw%20new%20Error(&#x27;%E4%BC%9A%E7%A4%BE%E3%81%AE%E5%88%86%E6%9E%90%E5%B8%B3%E7%A5%A8%E3%82%B5%E3%82%A4%E3%83%88%E3%81%A7%E3%80%81B10%E3%80%8C%E5%9C%B0%E5%8C%BA%E5%88%A5%E5%A3%B2%E4%B8%8A%E3%80%8D%E3%82%92%E9%96%8B%E3%81%84%E3%81%A6%E3%81%8B%E3%82%89%E5%AE%9F%E8%A1%8C%E3%81%97%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82&#x27;)%3B%0A%20%20%20%20%7D%0A%20%20%20%20if%20(window.__b10ExportRunning)%20throw%20new%20Error(&#x27;%E3%81%99%E3%81%A7%E3%81%AB%E5%87%A6%E7%90%86%E4%B8%AD%E3%81%A7%E3%81%99%E3%80%82%E3%81%97%E3%81%B0%E3%82%89%E3%81%8F%E3%81%8A%E5%BE%85%E3%81%A1%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82&#x27;)%3B%0A%20%20%20%20window.__b10ExportRunning%20%3D%20true%3B%0A%20%20%20%20const%20button%20%3D%20(doc%2C%20text)%20%3D%3E%20%5B...doc.querySelectorAll(&#x27;button&#x27;)%5D%0A%20%20%20%20%20%20.find(el%20%3D%3E%20visible(el)%20%26%26%20normalize(el.textContent)%20%3D%3D%3D%20normalize(text))%3B%0A%20%20%20%20let%20pending%3B%0A%20%20%20%20try%20%7B%20pending%20%3D%20JSON.parse(sessionStorage.getItem(key))%3B%20%7D%20catch%20(_)%20%7B%7D%0A%20%20%20%20if%20(!pending%20%7C%7C%20Date.now()%20-%20pending.started%20%3E%20180000)%20pending%20%3D%20null%3B%0A%20%20%20%20const%20onReport%20%3D%20!!button(document%2C%20&#x27;Excel%E5%87%BA%E5%8A%9B&#x27;)%3B%0A%20%20%20%20if%20(onReport%20%26%26%20!pending)%20throw%20new%20Error(&#x27;%E3%81%BE%E3%81%9A%E5%BA%97%E8%88%97%E3%83%BB%E6%9C%88%E3%82%92%E9%81%B8%E3%81%B6B10%E3%81%AE%E6%A4%9C%E7%B4%A2%E7%94%BB%E9%9D%A2%E3%81%A7%E3%80%81%E3%81%93%E3%81%AE%E3%81%8A%E6%B0%97%E3%81%AB%E5%85%A5%E3%82%8A%E3%82%92%E6%8A%BC%E3%81%97%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82&#x27;)%3B%0A%20%20%20%20if%20(!onReport%20%26%26%20!normalize(document.body.innerText).includes(&#x27;B10%EF%BC%9A%E5%9C%B0%E5%8C%BA%E5%88%A5%E5%A3%B2%E4%B8%8A&#x27;))%20%7B%0A%20%20%20%20%20%20throw%20new%20Error(&#x27;B10%E3%80%8C%E5%9C%B0%E5%8C%BA%E5%88%A5%E5%A3%B2%E4%B8%8A%E3%80%8D%E3%81%AE%E6%A4%9C%E7%B4%A2%E7%94%BB%E9%9D%A2%E3%82%92%E9%96%8B%E3%81%84%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82&#x27;)%3B%0A%20%20%20%20%7D%0A%20%20%20%20if%20(!onReport)%20%7B%0A%20%20%20%20%20%20const%20yearText%20%3D%20prompt(&#x27;%E5%AF%BE%E8%B1%A1%E5%B9%B4%EF%BC%88%E4%BE%8B%EF%BC%9A2026%EF%BC%89&#x27;%2C%20&#x27;2026&#x27;)%3B%0A%20%20%20%20%20%20if%20(yearText%20%3D%3D%3D%20null)%20return%3B%0A%20%20%20%20%20%20const%20monthText%20%3D%20prompt(&#x27;%E5%AF%BE%E8%B1%A1%E6%9C%88%EF%BC%881%E3%80%9C12%EF%BC%89&#x27;%2C%20&#x27;10&#x27;)%3B%0A%20%20%20%20%20%20if%20(monthText%20%3D%3D%3D%20null)%20return%3B%0A%20%20%20%20%20%20const%20storeText%20%3D%20prompt(&#x27;%E5%BA%97%E8%88%97%E7%95%AA%E5%8F%B7%EF%BC%88%E4%BE%8B%EF%BC%9A0589%EF%BC%89%E3%80%82%E5%BA%97%E8%88%97%E3%81%AF%E6%A4%9C%E7%B4%A2%E7%94%BB%E9%9D%A2%E3%81%AE%E4%B8%80%E8%A6%A7%E3%81%AB%E8%A1%A8%E7%A4%BA%E3%81%95%E3%82%8C%E3%81%A6%E3%81%84%E3%82%8B%E5%BF%85%E8%A6%81%E3%81%8C%E3%81%82%E3%82%8A%E3%81%BE%E3%81%99%E3%80%82&#x27;%2C%20&#x27;0589&#x27;)%3B%0A%20%20%20%20%20%20if%20(storeText%20%3D%3D%3D%20null)%20return%3B%0A%20%20%20%20%20%20if%20(!%2F%5E%5Cd%7B4%7D%24%2F.test(yearText.trim())%20%7C%7C%20!%2F%5E%5Cd%7B1%2C2%7D%24%2F.test(monthText.trim())%20%7C%7C%20!%2F%5E%5Cd%7B1%2C4%7D%24%2F.test(storeText.trim()))%20%7B%0A%20%20%20%20%20%20%20%20throw%20new%20Error(&#x27;%E5%B9%B4%E3%83%BB%E6%9C%88%E3%83%BB%E5%BA%97%E8%88%97%E7%95%AA%E5%8F%B7%E3%82%92%E5%8D%8A%E8%A7%92%E6%95%B0%E5%AD%97%E3%81%A7%E5%85%A5%E5%8A%9B%E3%81%97%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82&#x27;)%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20const%20year%20%3D%20Number(yearText)%2C%20month%20%3D%20Number(monthText)%2C%20store%20%3D%20storeText.trim().padStart(4%2C%20&#x27;0&#x27;)%3B%0A%20%20%20%20%20%20if%20(year%20%3C%202000%20%7C%7C%20year%20%3E%202100%20%7C%7C%20month%20%3C%201%20%7C%7C%20month%20%3E%2012)%20throw%20new%20Error(&#x27;%E5%B9%B4%E3%81%BE%E3%81%9F%E3%81%AF%E6%9C%88%E3%81%8C%E7%AF%84%E5%9B%B2%E5%A4%96%E3%81%A7%E3%81%99%E3%80%82&#x27;)%3B%0A%20%20%20%20%20%20const%20radio%20%3D%20text%20%3D%3E%20%7B%0A%20%20%20%20%20%20%20%20const%20label%20%3D%20%5B...document.querySelectorAll(&#x27;label.ant-radio-wrapper&#x27;)%5D%0A%20%20%20%20%20%20%20%20%20%20.find(el%20%3D%3E%20normalize(el.textContent)%20%3D%3D%3D%20text)%3B%0A%20%20%20%20%20%20%20%20if%20(!label)%20throw%20new%20Error(text%20%2B%20&#x27;%E3%81%AE%E9%81%B8%E6%8A%9E%E6%AC%84%E3%81%8C%E8%A6%8B%E3%81%A4%E3%81%8B%E3%82%8A%E3%81%BE%E3%81%9B%E3%82%93%E3%80%82&#x27;)%3B%0A%20%20%20%20%20%20%20%20label.click()%3B%0A%20%20%20%20%20%20%7D%3B%0A%20%20%20%20%20%20radio(&#x27;%E6%9C%88%E6%8C%87%E5%AE%9A&#x27;)%3B%0A%20%20%20%20%20%20await%20delay(100)%3B%0A%20%20%20%20%20%20const%20selects%20%3D%20%5B...document.querySelectorAll(&#x27;main%20.ant-select&#x27;)%5D.filter(visible)%3B%0A%20%20%20%20%20%20if%20(selects.length%20!%3D%3D%202)%20throw%20new%20Error(&#x27;%E5%B9%B4%E6%9C%88%E3%81%AE%E9%81%B8%E6%8A%9E%E6%AC%84%E3%81%AE%E6%A7%8B%E9%80%A0%E3%81%8C%E6%83%B3%E5%AE%9A%E3%81%A8%E7%95%B0%E3%81%AA%E3%82%8A%E3%81%BE%E3%81%99%E3%80%82%E5%87%A6%E7%90%86%E3%82%92%E5%81%9C%E6%AD%A2%E3%81%97%E3%81%BE%E3%81%97%E3%81%9F%E3%80%82&#x27;)%3B%0A%20%20%20%20%20%20async%20function%20choose(select%2C%20text)%20%7B%0A%20%20%20%20%20%20%20%20const%20current%20%3D%20()%20%3D%3E%20normalize(select.querySelector(&#x27;.ant-select-selection-selected-value&#x27;)%3F.textContent)%3B%0A%20%20%20%20%20%20%20%20if%20(current()%20%3D%3D%3D%20text)%20return%3B%0A%20%20%20%20%20%20%20%20select.querySelector(&#x27;%5Brole%3D%22combobox%22%5D&#x27;).click()%3B%0A%20%20%20%20%20%20%20%20let%20option%3B%0A%20%20%20%20%20%20%20%20for%20(let%20i%20%3D%200%3B%20i%20%3C%2030%20%26%26%20!option%3B%20i%2B%2B)%20%7B%0A%20%20%20%20%20%20%20%20%20%20option%20%3D%20%5B...document.querySelectorAll(&#x27;.ant-select-dropdown-menu-item&#x27;)%5D%0A%20%20%20%20%20%20%20%20%20%20%20%20.find(el%20%3D%3E%20visible(el)%20%26%26%20normalize(el.textContent)%20%3D%3D%3D%20text)%3B%0A%20%20%20%20%20%20%20%20%20%20if%20(!option)%20await%20delay(100)%3B%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20if%20(!option)%20throw%20new%20Error(text%20%2B%20&#x27;%E3%81%AE%E5%80%99%E8%A3%9C%E3%81%8C%E8%A6%8B%E3%81%A4%E3%81%8B%E3%82%8A%E3%81%BE%E3%81%9B%E3%82%93%E3%80%82&#x27;)%3B%0A%20%20%20%20%20%20%20%20option.click()%3B%0A%20%20%20%20%20%20%20%20await%20delay(150)%3B%0A%20%20%20%20%20%20%20%20if%20(current()%20!%3D%3D%20text)%20throw%20new%20Error(text%20%2B%20&#x27;%E3%81%B8%E3%81%AE%E5%88%87%E3%82%8A%E6%9B%BF%E3%81%88%E3%82%92%E7%A2%BA%E8%AA%8D%E3%81%A7%E3%81%8D%E3%81%BE%E3%81%9B%E3%82%93%E3%81%A7%E3%81%97%E3%81%9F%E3%80%82&#x27;)%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20await%20choose(selects%5B0%5D%2C%20year%20%2B%20&#x27;%E5%B9%B4&#x27;)%3B%0A%20%20%20%20%20%20await%20choose(selects%5B1%5D%2C%20month%20%2B%20&#x27;%E6%9C%88&#x27;)%3B%0A%20%20%20%20%20%20radio(&#x27;%E6%97%A5%E4%BB%98%E3%81%82%E3%82%8F%E3%81%9B&#x27;)%3B%0A%20%20%20%20%20%20const%20row%20%3D%20%5B...document.querySelectorAll(&#x27;tr%5Browid%5D&#x27;)%5D.find(el%20%3D%3E%20el.getAttribute(&#x27;rowid&#x27;)%20%3D%3D%3D%20store%20%26%26%20visible(el))%3B%0A%20%20%20%20%20%20if%20(!row)%20throw%20new%20Error(&#x27;%E5%BA%97%E8%88%97%20&#x27;%20%2B%20store%20%2B%20&#x27;%20%E3%81%8C%E4%B8%80%E8%A6%A7%E3%81%AB%E3%81%82%E3%82%8A%E3%81%BE%E3%81%9B%E3%82%93%E3%80%82%E5%BA%97%E8%88%97%E7%B5%9E%E8%BE%BC%E3%81%BF%E3%81%A7%E8%A1%A8%E7%A4%BA%E3%81%97%E3%81%A6%E3%81%8B%E3%82%89%E3%80%81%E3%82%82%E3%81%86%E4%B8%80%E5%BA%A6%E5%AE%9F%E8%A1%8C%E3%81%97%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82&#x27;)%3B%0A%20%20%20%20%20%20const%20storeRadio%20%3D%20row.querySelector(&#x27;.vxe-cell--radio&#x27;)%3B%0A%20%20%20%20%20%20if%20(!storeRadio)%20throw%20new%20Error(&#x27;%E5%BA%97%E8%88%97%E3%81%AE%E9%81%B8%E6%8A%9E%E3%83%9C%E3%82%BF%E3%83%B3%E3%81%8C%E8%A6%8B%E3%81%A4%E3%81%8B%E3%82%8A%E3%81%BE%E3%81%9B%E3%82%93%E3%80%82&#x27;)%3B%0A%20%20%20%20%20%20storeRadio.click()%3B%0A%20%20%20%20%20%20await%20delay(150)%3B%0A%20%20%20%20%20%20if%20(!storeRadio.classList.contains(&#x27;is--checked&#x27;))%20throw%20new%20Error(&#x27;%E5%BA%97%E8%88%97%E9%81%B8%E6%8A%9E%E3%82%92%E7%A2%BA%E8%AA%8D%E3%81%A7%E3%81%8D%E3%81%BE%E3%81%9B%E3%82%93%E3%81%A7%E3%81%97%E3%81%9F%E3%80%82&#x27;)%3B%0A%20%20%20%20%20%20const%20dateRadio%20%3D%20%5B...document.querySelectorAll(&#x27;label.ant-radio-wrapper&#x27;)%5D.find(el%20%3D%3E%20normalize(el.textContent)%20%3D%3D%3D%20&#x27;%E6%97%A5%E4%BB%98%E3%81%82%E3%82%8F%E3%81%9B&#x27;)%3B%0A%20%20%20%20%20%20if%20(!dateRadio%3F.classList.contains(&#x27;ant-radio-wrapper-checked&#x27;))%20throw%20new%20Error(&#x27;%E6%97%A5%E4%BB%98%E3%81%82%E3%82%8F%E3%81%9B%E3%81%AE%E9%81%B8%E6%8A%9E%E3%82%92%E7%A2%BA%E8%AA%8D%E3%81%A7%E3%81%8D%E3%81%BE%E3%81%9B%E3%82%93%E3%81%A7%E3%81%97%E3%81%9F%E3%80%82&#x27;)%3B%0A%20%20%20%20%20%20const%20run%20%3D%20button(document%2C%20&#x27;%E5%AE%9F%E8%A1%8C&#x27;)%3B%0A%20%20%20%20%20%20if%20(!run%20%7C%7C%20run.disabled)%20throw%20new%20Error(&#x27;%E5%AE%9F%E8%A1%8C%E3%83%9C%E3%82%BF%E3%83%B3%E3%82%92%E6%93%8D%E4%BD%9C%E3%81%A7%E3%81%8D%E3%81%BE%E3%81%9B%E3%82%93%E3%80%82&#x27;)%3B%0A%20%20%20%20%20%20pending%20%3D%20%7Byear%2C%20month%2C%20store%2C%20started%3A%20Date.now()%7D%3B%0A%20%20%20%20%20%20sessionStorage.setItem(key%2C%20JSON.stringify(pending))%3B%0A%20%20%20%20%20%20originalOpen%20%3D%20window.open%3B%0A%20%20%20%20%20%20wrappedOpen%20%3D%20function%20(...args)%20%7B%0A%20%20%20%20%20%20%20%20const%20child%20%3D%20originalOpen.apply(window%2C%20args)%3B%0A%20%20%20%20%20%20%20%20if%20(child)%20popups.push(child)%3B%0A%20%20%20%20%20%20%20%20return%20child%3B%0A%20%20%20%20%20%20%7D%3B%0A%20%20%20%20%20%20window.open%20%3D%20wrappedOpen%3B%0A%20%20%20%20%20%20run.click()%3B%0A%20%20%20%20%7D%0A%20%20%20%20%2F%2F%20SPA%E5%86%85%E3%81%AE%E9%81%B7%E7%A7%BB%E3%81%A8%E3%80%81%E5%8F%82%E7%85%A7%E5%8F%AF%E8%83%BD%E3%81%AA%E5%90%8C%E4%B8%80%E3%82%AA%E3%83%AA%E3%82%B8%E3%83%B3%E3%81%AE%E5%88%A5%E7%AA%93%E3%82%92%E5%BE%85%E3%81%A4%E3%80%82%0A%20%20%20%20for%20(let%20i%20%3D%200%3B%20i%20%3C%20240%3B%20i%2B%2B)%20%7B%0A%20%20%20%20%20%20for%20(const%20win%20of%20%5Bwindow%2C%20...popups%5D)%20%7B%0A%20%20%20%20%20%20%20%20let%20doc%3B%0A%20%20%20%20%20%20%20%20try%20%7B%20doc%20%3D%20win.document%3B%20%7D%20catch%20(_)%20%7B%20continue%3B%20%7D%0A%20%20%20%20%20%20%20%20const%20excel%20%3D%20button(doc%2C%20&#x27;Excel%E5%87%BA%E5%8A%9B&#x27;)%3B%0A%20%20%20%20%20%20%20%20if%20(!excel%20%7C%7C%20excel.disabled)%20continue%3B%0A%20%20%20%20%20%20%20%20const%20header%20%3D%20normalize(doc.querySelector(&#x27;header&#x27;)%3F.innerText)%3B%0A%20%20%20%20%20%20%20%20const%20storeMatch%20%3D%20header.match(%2F%E5%BA%97%E8%88%97%5B%3A%EF%BC%9A%5D(%5Cd%7B4%7D)%2F)%3B%0A%20%20%20%20%20%20%20%20const%20periodMatch%20%3D%20header.match(%2F%E6%9C%9F%E9%96%93%5B%3A%EF%BC%9A%5D(%5Cd%7B4%7D)%5C%2F(%5Cd%7B1%2C2%7D)%5C%2F(%5Cd%7B1%2C2%7D)%5B%EF%BD%9E%E3%80%9C~%5D(%5Cd%7B4%7D)%5C%2F(%5Cd%7B1%2C2%7D)%5C%2F(%5Cd%7B1%2C2%7D)%2F)%3B%0A%20%20%20%20%20%20%20%20if%20(!storeMatch%20%7C%7C%20!periodMatch)%20throw%20new%20Error(&#x27;%E7%B5%90%E6%9E%9C%E7%94%BB%E9%9D%A2%E3%81%AE%E5%BA%97%E8%88%97%E3%83%BB%E6%9C%9F%E9%96%93%E3%82%92%E8%AA%AD%E3%81%BF%E5%8F%96%E3%82%8C%E3%81%BE%E3%81%9B%E3%82%93%E3%80%82Excel%E5%87%BA%E5%8A%9B%E3%82%92%E5%81%9C%E6%AD%A2%E3%81%97%E3%81%BE%E3%81%97%E3%81%9F%E3%80%82&#x27;)%3B%0A%20%20%20%20%20%20%20%20if%20(storeMatch%5B1%5D%20!%3D%3D%20pending.store%20%7C%7C%20Number(periodMatch%5B1%5D)%20!%3D%3D%20pending.year%20%7C%7C%20Number(periodMatch%5B2%5D)%20!%3D%3D%20pending.month%20%7C%7C%20Number(periodMatch%5B4%5D)%20!%3D%3D%20pending.year%20%7C%7C%20Number(periodMatch%5B5%5D)%20!%3D%3D%20pending.month)%20%7B%0A%20%20%20%20%20%20%20%20%20%20throw%20new%20Error(&#x27;%E7%B5%90%E6%9E%9C%E7%94%BB%E9%9D%A2%E3%81%AE%E5%BA%97%E8%88%97%E3%81%BE%E3%81%9F%E3%81%AF%E5%AF%BE%E8%B1%A1%E6%9C%88%E3%81%8C%E6%8C%87%E5%AE%9A%E3%81%A8%E9%81%95%E3%81%84%E3%81%BE%E3%81%99%E3%80%82Excel%E5%87%BA%E5%8A%9B%E3%82%92%E5%81%9C%E6%AD%A2%E3%81%97%E3%81%BE%E3%81%97%E3%81%9F%E3%80%82&#x27;)%3B%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20sessionStorage.removeItem(key)%3B%0A%20%20%20%20%20%20%20%20excel.click()%3B%0A%20%20%20%20%20%20%20%20return%3B%20%2F%2F%20%E3%82%AF%E3%83%AA%E3%83%83%E3%82%AF%E3%81%AE%E6%88%90%E5%8A%9F%E3%81%AF%E3%80%81%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89%E5%AE%8C%E4%BA%86%E3%81%AE%E4%BF%9D%E8%A8%BC%E3%81%A7%E3%81%AF%E3%81%AA%E3%81%84%E3%80%82%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20await%20delay(250)%3B%0A%20%20%20%20%7D%0A%20%20%20%20throw%20new%20Error(&#x27;%E7%B5%90%E6%9E%9C%E7%94%BB%E9%9D%A2%E3%82%92%E8%87%AA%E5%8B%95%E3%81%A7%E5%8F%96%E5%BE%97%E3%81%A7%E3%81%8D%E3%81%BE%E3%81%9B%E3%82%93%E3%81%A7%E3%81%97%E3%81%9F%E3%80%82%E7%B5%90%E6%9E%9C%E7%94%BB%E9%9D%A2%E3%81%A7%E5%90%8C%E3%81%98%E3%81%8A%E6%B0%97%E3%81%AB%E5%85%A5%E3%82%8A%E3%82%92%E3%82%82%E3%81%86%E4%B8%80%E5%BA%A6%E6%8A%BC%E3%81%97%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82&#x27;)%3B%0A%20%20%7D%20catch%20(error)%20%7B%0A%20%20%20%20sessionStorage.removeItem(key)%3B%0A%20%20%20%20alert(&#x27;%E5%9C%B0%E5%8C%BA%E5%88%A5%E5%A3%B2%E4%B8%8A%EF%BC%9A&#x27;%20%2B%20error.message)%3B%0A%20%20%7D%20finally%20%7B%0A%20%20%20%20if%20(wrappedOpen%20%26%26%20window.open%20%3D%3D%3D%20wrappedOpen)%20window.open%20%3D%20originalOpen%3B%0A%20%20%20%20window.__b10ExportRunning%20%3D%20false%3B%0A%20%20%7D%0A%7D)()%3B%0A">地区別売上を出力</a></p>
+<h2>使い方</h2><ol><li>会社のシステムから<strong>B10「地区別売上」の店舗・月を選ぶ画面</strong>を開きます。</li><li>店舗一覧に<strong>0589 ピザーラ豊田北</strong>を表示しておきます。</li><li>登録したお気に入り「地区別売上を出力」を押します。</li><li>年は<strong>2026</strong>、月は<strong>10</strong>、店舗番号は<strong>0589</strong>を入力します。</li><li>日付あわせで実行し、店舗・年月を照合してExcel出力ボタンを押します。保存できたかはブラウザーのダウンロード一覧で確認してください。</li></ol>
+<div class="note"><strong>試作版の制限</strong><ul><li>社内サイトでの実動作は未検証です。添付画面を使ったローカルのテストのみ実施しました。</li><li>結果画面へ移った後に出力されない場合は、3分以内に結果画面で同じお気に入りをもう一度押してください。</li><li>店舗一覧にない店舗は自動検索しません。店舗絞込みで表示してから使います。</li><li>ブランドの切り替えは含みません。結果画面の現在のブランドで出力します。今回の見本は「全て」です。</li><li>月途中の期間は、サイトが返した最新日までになります。</li><li>会社のブラウザー設定で実行が禁止されている場合は停止してください。制限の解除は必要ありません。</li></ul></div>
+<p>このコードは会社サイトの選択欄・ボタンを操作するだけで、Cookieやパスワードを読み取ったり、帳票データを外部へ送ったりする処理はありません。</p>
+<details><summary>実行するコードを見る</summary><pre>/* B10地区別売上: 公開DOMの操作だけを行うブックマークレット。 */
+(async () =&gt; {
+  &#x27;use strict&#x27;;
+  const normalize = s =&gt; String(s || &#x27;&#x27;).replace(/\s/g, &#x27;&#x27;);
+  const visible = el =&gt; el &amp;&amp; el.getClientRects().length &gt; 0;
+  const delay = ms =&gt; new Promise(resolve =&gt; setTimeout(resolve, ms));
+  const key = &#x27;fsbi-b10-export-v1&#x27;;
+  let originalOpen;
+  let wrappedOpen;
+  const popups = [];
+  try {
+    if (location.hostname !== &#x27;in-bi.four-seeds.jp&#x27; || !location.pathname.startsWith(&#x27;/fsbi/&#x27;)) {
+      throw new Error(&#x27;会社の分析帳票サイトで、B10「地区別売上」を開いてから実行してください。&#x27;);
+    }
+    if (window.__b10ExportRunning) throw new Error(&#x27;すでに処理中です。しばらくお待ちください。&#x27;);
+    window.__b10ExportRunning = true;
+    const button = (doc, text) =&gt; [...doc.querySelectorAll(&#x27;button&#x27;)]
+      .find(el =&gt; visible(el) &amp;&amp; normalize(el.textContent) === normalize(text));
+    let pending;
+    try { pending = JSON.parse(sessionStorage.getItem(key)); } catch (_) {}
+    if (!pending || Date.now() - pending.started &gt; 180000) pending = null;
+    const onReport = !!button(document, &#x27;Excel出力&#x27;);
+    if (onReport &amp;&amp; !pending) throw new Error(&#x27;まず店舗・月を選ぶB10の検索画面で、このお気に入りを押してください。&#x27;);
+    if (!onReport &amp;&amp; !normalize(document.body.innerText).includes(&#x27;B10：地区別売上&#x27;)) {
+      throw new Error(&#x27;B10「地区別売上」の検索画面を開いてください。&#x27;);
+    }
+    if (!onReport) {
+      const yearText = prompt(&#x27;対象年（例：2026）&#x27;, &#x27;2026&#x27;);
+      if (yearText === null) return;
+      const monthText = prompt(&#x27;対象月（1〜12）&#x27;, &#x27;10&#x27;);
+      if (monthText === null) return;
+      const storeText = prompt(&#x27;店舗番号（例：0589）。店舗は検索画面の一覧に表示されている必要があります。&#x27;, &#x27;0589&#x27;);
+      if (storeText === null) return;
+      if (!/^\d{4}$/.test(yearText.trim()) || !/^\d{1,2}$/.test(monthText.trim()) || !/^\d{1,4}$/.test(storeText.trim())) {
+        throw new Error(&#x27;年・月・店舗番号を半角数字で入力してください。&#x27;);
+      }
+      const year = Number(yearText), month = Number(monthText), store = storeText.trim().padStart(4, &#x27;0&#x27;);
+      if (year &lt; 2000 || year &gt; 2100 || month &lt; 1 || month &gt; 12) throw new Error(&#x27;年または月が範囲外です。&#x27;);
+      const radio = text =&gt; {
+        const label = [...document.querySelectorAll(&#x27;label.ant-radio-wrapper&#x27;)]
+          .find(el =&gt; normalize(el.textContent) === text);
+        if (!label) throw new Error(text + &#x27;の選択欄が見つかりません。&#x27;);
+        label.click();
+      };
+      radio(&#x27;月指定&#x27;);
+      await delay(100);
+      const selects = [...document.querySelectorAll(&#x27;main .ant-select&#x27;)].filter(visible);
+      if (selects.length !== 2) throw new Error(&#x27;年月の選択欄の構造が想定と異なります。処理を停止しました。&#x27;);
+      async function choose(select, text) {
+        const current = () =&gt; normalize(select.querySelector(&#x27;.ant-select-selection-selected-value&#x27;)?.textContent);
+        if (current() === text) return;
+        select.querySelector(&#x27;[role=&quot;combobox&quot;]&#x27;).click();
+        let option;
+        for (let i = 0; i &lt; 30 &amp;&amp; !option; i++) {
+          option = [...document.querySelectorAll(&#x27;.ant-select-dropdown-menu-item&#x27;)]
+            .find(el =&gt; visible(el) &amp;&amp; normalize(el.textContent) === text);
+          if (!option) await delay(100);
+        }
+        if (!option) throw new Error(text + &#x27;の候補が見つかりません。&#x27;);
+        option.click();
+        await delay(150);
+        if (current() !== text) throw new Error(text + &#x27;への切り替えを確認できませんでした。&#x27;);
+      }
+      await choose(selects[0], year + &#x27;年&#x27;);
+      await choose(selects[1], month + &#x27;月&#x27;);
+      radio(&#x27;日付あわせ&#x27;);
+      const row = [...document.querySelectorAll(&#x27;tr[rowid]&#x27;)].find(el =&gt; el.getAttribute(&#x27;rowid&#x27;) === store &amp;&amp; visible(el));
+      if (!row) throw new Error(&#x27;店舗 &#x27; + store + &#x27; が一覧にありません。店舗絞込みで表示してから、もう一度実行してください。&#x27;);
+      const storeRadio = row.querySelector(&#x27;.vxe-cell--radio&#x27;);
+      if (!storeRadio) throw new Error(&#x27;店舗の選択ボタンが見つかりません。&#x27;);
+      storeRadio.click();
+      await delay(150);
+      if (!storeRadio.classList.contains(&#x27;is--checked&#x27;)) throw new Error(&#x27;店舗選択を確認できませんでした。&#x27;);
+      const dateRadio = [...document.querySelectorAll(&#x27;label.ant-radio-wrapper&#x27;)].find(el =&gt; normalize(el.textContent) === &#x27;日付あわせ&#x27;);
+      if (!dateRadio?.classList.contains(&#x27;ant-radio-wrapper-checked&#x27;)) throw new Error(&#x27;日付あわせの選択を確認できませんでした。&#x27;);
+      const run = button(document, &#x27;実行&#x27;);
+      if (!run || run.disabled) throw new Error(&#x27;実行ボタンを操作できません。&#x27;);
+      pending = {year, month, store, started: Date.now()};
+      sessionStorage.setItem(key, JSON.stringify(pending));
+      originalOpen = window.open;
+      wrappedOpen = function (...args) {
+        const child = originalOpen.apply(window, args);
+        if (child) popups.push(child);
+        return child;
+      };
+      window.open = wrappedOpen;
+      run.click();
+    }
+    // SPA内の遷移と、参照可能な同一オリジンの別窓を待つ。
+    for (let i = 0; i &lt; 240; i++) {
+      for (const win of [window, ...popups]) {
+        let doc;
+        try { doc = win.document; } catch (_) { continue; }
+        const excel = button(doc, &#x27;Excel出力&#x27;);
+        if (!excel || excel.disabled) continue;
+        const header = normalize(doc.querySelector(&#x27;header&#x27;)?.innerText);
+        const storeMatch = header.match(/店舗[:：](\d{4})/);
+        const periodMatch = header.match(/期間[:：](\d{4})\/(\d{1,2})\/(\d{1,2})[～〜~](\d{4})\/(\d{1,2})\/(\d{1,2})/);
+        if (!storeMatch || !periodMatch) throw new Error(&#x27;結果画面の店舗・期間を読み取れません。Excel出力を停止しました。&#x27;);
+        if (storeMatch[1] !== pending.store || Number(periodMatch[1]) !== pending.year || Number(periodMatch[2]) !== pending.month || Number(periodMatch[4]) !== pending.year || Number(periodMatch[5]) !== pending.month) {
+          throw new Error(&#x27;結果画面の店舗または対象月が指定と違います。Excel出力を停止しました。&#x27;);
+        }
+        sessionStorage.removeItem(key);
+        excel.click();
+        return; // クリックの成功は、ダウンロード完了の保証ではない。
+      }
+      await delay(250);
+    }
+    throw new Error(&#x27;結果画面を自動で取得できませんでした。結果画面で同じお気に入りをもう一度押してください。&#x27;);
+  } catch (error) {
+    sessionStorage.removeItem(key);
+    alert(&#x27;地区別売上：&#x27; + error.message);
+  } finally {
+    if (wrappedOpen &amp;&amp; window.open === wrappedOpen) window.open = originalOpen;
+    window.__b10ExportRunning = false;
+  }
+})();
+</pre></details></html>
