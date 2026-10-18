@@ -29,7 +29,7 @@
       if (yearText === null) return;
       const monthText = prompt('対象月（1〜12）', '10');
       if (monthText === null) return;
-      const storeText = prompt('店舗番号（例：0589）。店舗は検索画面の一覧に表示されている必要があります。', '0589');
+      const storeText = prompt('店舗番号（例：0589）。店舗一覧を自動で探します。', '0589');
       if (storeText === null) return;
       if (!/^\d{4}$/.test(yearText.trim()) || !/^\d{1,2}$/.test(monthText.trim()) || !/^\d{1,4}$/.test(storeText.trim())) {
         throw new Error('年・月・店舗番号を半角数字で入力してください。');
@@ -64,13 +64,59 @@
       await choose(selects[0], year + '年');
       await choose(selects[1], month + '月');
       radio('日付あわせ');
-      const row = [...document.querySelectorAll('tr[rowid]')].find(el => el.getAttribute('rowid') === store && visible(el));
-      if (!row) throw new Error('店舗 ' + store + ' が一覧にありません。店舗絞込みで表示してから、もう一度実行してください。');
+      // 仮想スクロールでは画面外の店舗行がDOMにないため、一覧を順に送る。
+      const codeMatches = value => /^\d{1,4}$/.test(normalize(value)) && normalize(value).padStart(4, '0') === store;
+      const findRow = () => [...document.querySelectorAll('.vxe-table tr[rowid]')].find(el =>
+        visible(el) && (codeMatches(el.getAttribute('rowid')) ||
+          [...el.querySelectorAll('.vxe-cell--label')].some(cell => codeMatches(cell.textContent))));
+      async function locateStore() {
+        let row = findRow();
+        if (row) return row;
+        const wrappers = [...document.querySelectorAll('.vxe-table .vxe-table--body-wrapper')]
+          .filter(el => visible(el) && el.clientHeight > 0);
+        const deadline = Date.now() + 45000;
+        const notice = document.createElement('div');
+        notice.textContent = '店舗 ' + store + ' を一覧から探しています…';
+        notice.setAttribute('role', 'status');
+        notice.style.cssText = 'position:fixed;right:20px;top:20px;z-index:2147483647;padding:14px;background:#173653;color:white;border-radius:8px;pointer-events:none';
+        document.body.appendChild(notice);
+        try {
+          for (const wrapper of wrappers) {
+            const originalTop = wrapper.scrollTop;
+            wrapper.scrollTop = 0;
+            wrapper.dispatchEvent(new Event('scroll'));
+            await delay(200);
+            for (let step = 0; step < 600 && Date.now() < deadline; step++) {
+              row = findRow();
+              if (row) return row;
+              const maxTop = Math.max(0, wrapper.scrollHeight - wrapper.clientHeight);
+              if (wrapper.scrollTop >= maxTop - 1) {
+                await delay(300);
+                row = findRow();
+                if (row) return row;
+                if (wrapper.scrollTop >= wrapper.scrollHeight - wrapper.clientHeight - 1) break;
+              }
+              const before = wrapper.scrollTop;
+              wrapper.scrollTop = Math.min(wrapper.scrollHeight - wrapper.clientHeight,
+                before + Math.max(32, Math.floor(wrapper.clientHeight * 0.8)));
+              wrapper.dispatchEvent(new Event('scroll'));
+              await delay(160);
+              if (wrapper.scrollTop === before) break;
+            }
+            wrapper.scrollTop = originalTop;
+            wrapper.dispatchEvent(new Event('scroll'));
+            await delay(160);
+          }
+          return findRow();
+        } finally { notice.remove(); }
+      }
+      const row = await locateStore();
+      if (!row) throw new Error('店舗 ' + store + ' を一覧から見つけられませんでした。以前の店舗絞込みが残っている場合は解除してください。表示権限や閉店店舗の設定によって一覧にない店舗は選べません。');
       const storeRadio = row.querySelector('.vxe-cell--radio');
       if (!storeRadio) throw new Error('店舗の選択ボタンが見つかりません。');
       storeRadio.click();
       await delay(150);
-      if (!storeRadio.classList.contains('is--checked')) throw new Error('店舗選択を確認できませんでした。');
+      if (!findRow()?.querySelector('.vxe-cell--radio.is--checked')) throw new Error('店舗選択を確認できませんでした。');
       const dateRadio = [...document.querySelectorAll('label.ant-radio-wrapper')].find(el => normalize(el.textContent) === '日付あわせ');
       if (!dateRadio?.classList.contains('ant-radio-wrapper-checked')) throw new Error('日付あわせの選択を確認できませんでした。');
       const run = button(document, '実行');
